@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Product Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --card: #1c1c28;
+    --accent: #ff6b2b;
+    --accent2: #ff9f1c;
+    --text: #f0f0f5;
+    --muted: #7070a0;
+    --border: #2a2a3d;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 20% 20%, #1a0a2e 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 80%, #0d1a2e 0%, transparent 60%);
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { font-weight: 400; color: var(--muted); -webkit-text-fill-color: var(--muted); }
+
+  .header-stats { display: flex; gap: 16px; font-size: 0.85rem; color: var(--muted); }
+
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-pill .num { color: var(--accent); font-weight: 700; font-family: 'Syne', sans-serif; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+
+  .top-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-box { flex: 1; min-width: 220px; position: relative; }
+
+  .search-box input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px 12px 44px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-box input:focus { border-color: var(--accent); }
+  .search-box input::placeholder { color: var(--muted); }
+
+  .search-box .icon {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--muted); font-size: 1.1rem;
+  }
+
+  select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  select:focus { border-color: var(--accent); }
+
+  .btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: flex-start;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%;
+    max-width: 500px;
+    animation: slideUp 0.25s ease;
+    margin: auto;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--accent); }
+
+  .form-group textarea { resize: vertical; min-height: 70px; }
+
+  /* Image Upload */
+  .img-upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .img-upload-area:hover { border-color: var(--accent); background: rgba(255,107,43,0.04); }
+  .img-upload-area.drag-over { border-color: var(--accent); background: rgba(255,107,43,0.08); }
+
+  .img-upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0;
+    cursor: pointer; width: 100%; height: 100%; padding: 0;
+  }
+
+  .upload-icon { font-size: 2.2rem; margin-bottom: 8px; }
+  .upload-text { font-size: 0.87rem; color: var(--muted); line-height: 1.6; }
+  .upload-text span { color: var(--accent); font-weight: 600; }
+
+  .img-preview-wrap { display: none; position: relative; border-radius: 10px; overflow: hidden; }
+  .img-preview-wrap.visible { display: block; }
+
+  .img-preview-wrap img {
+    width: 100%; height: 190px; object-fit: cover; display: block; background: var(--surface);
+  }
+
+  .img-remove-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,0.7); border: none; color: white;
+    border-radius: 50%; width: 30px; height: 30px;
+    cursor: pointer; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .img-remove-btn:hover { background: var(--danger); }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+  .btn-cancel {
+    flex: 1; background: var(--surface);
+    border: 1px solid var(--border); color: var(--muted);
+    border-radius: 10px; padding: 11px;
+    font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+  }
+
+  .btn-cancel:hover { background: var(--border); }
+
+  /* Grid */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .product-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .product-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+
+  .product-img {
+    width: 100%; height: 180px; object-fit: cover; display: block;
+    cursor: zoom-in; transition: transform 0.3s;
+  }
+
+  .product-img:hover { transform: scale(1.03); }
+
+  .product-img-placeholder {
+    width: 100%; height: 150px;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem;
+  }
+
+  .product-body { padding: 18px; }
+
+  .category-badge {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 10px;
+  }
+
+  .cat-charger { background: #1a2a4a; color: #60a5fa; }
+  .cat-handsfree { background: #1a2a1a; color: #4ade80; }
+  .cat-speaker { background: #2a1a3a; color: #c084fc; }
+  .cat-headphones { background: #2a2a1a; color: #fbbf24; }
+  .cat-watch { background: #2a1a1a; color: #f87171; }
+  .cat-other { background: #1a2a2a; color: #22d3ee; }
+
+  .product-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 5px; }
+  .product-desc { font-size: 0.83rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+
+  .product-price {
+    font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .product-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+  }
+
+  .product-stock { font-size: 0.82rem; display: flex; align-items: center; gap: 5px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot.in { background: var(--success); }
+  .dot.out { background: var(--danger); }
+
+  .card-actions { display: flex; gap: 8px; }
+
+  .icon-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 7px; padding: 6px 10px;
+    cursor: pointer; font-size: 0.82rem; transition: all 0.2s;
+  }
+
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* Lightbox */
+  .lightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.93); z-index: 300;
+    align-items: center; justify-content: center; cursor: zoom-out;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox img {
+    max-width: 90vw; max-height: 88vh;
+    object-fit: contain; border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    animation: zoomIn 0.2s ease;
+  }
+
+  @keyframes zoomIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .lightbox-close {
+    position: absolute; top: 20px; right: 24px;
+    color: white; font-size: 2rem; cursor: pointer;
+    opacity: 0.7; transition: opacity 0.2s; line-height: 1;
+  }
+
+  .lightbox-close:hover { opacity: 1; }
+
+  /* Empty */
+  .empty-state {
+    text-align: center; padding: 80px 20px;
+    color: var(--muted); grid-column: 1 / -1;
+  }
+
+  .empty-state .big { font-size: 3rem; margin-bottom: 16px; }
+  .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 8px; color: var(--text); }
+
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+  }
+
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  @media (max-width: 600px) {
+    .header-stats { display: none; }
+    .top-bar { flex-direction: column; }
+    .search-box { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">My<span>Store</span> 🛍️</div>
+  <div class="header-stats">
+    <div class="stat-pill">Products: <span class="num" id="totalCount">0</span></div>
+    <div class="stat-pill">Total Value: <span class="num" id="totalValue">Rs 0</span></div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="top-bar">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Product search karein..." oninput="renderProducts()">
+    </div>
+    <select id="filterCat" onchange="renderProducts()">
+      <option value="">Sab Categories</option>
+      <option value="charger">Charger Cable</option>
+      <option value="handsfree">Handsfree</option>
+      <option value="speaker">Speaker</option>
+      <option value="headphones">Headphones</option>
+      <option value="watch">Watch</option>
+      <option value="other">Other</option>
+    </select>
+    <select id="sortBy" onchange="renderProducts()">
+      <option value="newest">Naya Pehle</option>
+      <option value="price_asc">Price: Kam se Zyada</option>
+      <option value="price_desc">Price: Zyada se Kam</option>
+      <option value="name">Naam A-Z</option>
+    </select>
+    <button class="btn" onclick="openModal()">+ Product Add Karein</button>
+  </div>
+
+  <div class="section-title" id="resultTitle">Tamam Products</div>
+  <div class="products-grid" id="productsGrid"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">✦ Naya Product Add Karein</h2>
+
+    <div class="form-group">
+      <label>Product Ki Tasveer (Optional)</label>
+      <div class="img-preview-wrap" id="imgPreviewWrap">
+        <img id="imgPreview" src="" alt="Preview">
+        <button class="img-remove-btn" onclick="removeImage()" title="Hatao">✕</button>
+      </div>
+      <div class="img-upload-area" id="uploadArea">
+        <input type="file" id="pImg" accept="image/*" onchange="handleImageUpload(event)">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">
+          <span>Tap karein</span> ya drag karein<br>
+          <small>JPG, PNG, WEBP — Max 2MB</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Product Ka Naam *</label>
+      <input type="text" id="pName" placeholder="e.g. Samsung 65W Charger">
+    </div>
+    <div class="form-group">
+      <label>Category *</label>
+      <select id="pCat">
+        <option value="charger">⚡ Charger Cable</option>
+        <option value="handsfree">🎧 Handsfree</option>
+        <option value="speaker">🔊 Speaker</option>
+        <option value="headphones">🎵 Headphones</option>
+        <option value="watch">⌚ Watch</option>
+        <option value="other">📦 Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Price (Rupees) *</label>
+      <input type="number" id="pPrice" placeholder="e.g. 1500" min="0">
+    </div>
+    <div class="form-group">
+      <label>Description (Optional)</label>
+      <textarea id="pDesc" placeholder="Product ki details likhein..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Stock</label>
+      <select id="pStock">
+        <option value="in">In Stock ✅</option>
+        <option value="out">Out of Stock ❌</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn" style="flex:2" onclick="saveProduct()">💾 Save Karein</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close">✕</span>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+  let products = JSON.parse(localStorage.getItem('myStoreV3') || '[]');
+  let editingId = null;
+  let currentImgBase64 = null;
+
+  const catLabels = {
+    charger:'⚡ Charger', handsfree:'🎧 Handsfree', speaker:'🔊 Speaker',
+    headphones:'🎵 Headphones', watch:'⌚ Watch', other:'📦 Other'
+  };
+  const catEmoji = {
+    charger:'⚡', handsfree:'🎧', speaker:'🔊',
+    headphones:'🎵', watch:'⌚', other:'📦'
+  };
+
+  function save() {
+    try { localStorage.setItem('myStoreV3', JSON.stringify(products)); }
+    catch(e) { alert('Storage full! Kuch products delete karein.'); }
+  }
+
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Image 2MB se choti honi chahiye!'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      currentImgBase64 = ev.target.result;
+      document.getElementById('imgPreview').src = currentImgBase64;
+      document.getElementById('imgPreviewWrap').classList.add('visible');
+      document.getElementById('uploadArea').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeImage() {
+    currentImgBase64 = null;
+    document.getElementById('imgPreview').src = '';
+    document.getElementById('imgPreviewWrap').classList.remove('visible');
+    document.getElementById('uploadArea').style.display = 'block';
+    document.getElementById('pImg').value = '';
+  }
+
+  function openModal(id = null) {
+    editingId = id;
+    removeImage();
+    if (id) {
+      const p = products.find(x => x.id === id);
+      document.getElementById('modalTitle').textContent = '✏️ Product Edit Karein';
+      document.getElementById('pName').value = p.name;
+      document.getElementById('pCat').value = p.cat;
+      document.getElementById('pPrice').value = p.price;
+      document.getElementById('pDesc').value = p.desc || '';
+      document.getElementById('pStock').value = p.stock;
+      if (p.img) {
+        currentImgBase64 = p.img;
+        document.getElementById('imgPreview').src = p.img;
+        document.getElementById('imgPreviewWrap').classList.add('visible');
+        document.getElementById('uploadArea').style.display = 'none';
+      }
+    } else {
+      document.getElementById('modalTitle').textContent = '✦ Naya Product Add Karein';
+      ['pName','pPrice','pDesc'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pCat').value = 'charger';
+      document.getElementById('pStock').value = 'in';
+    }
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    editingId = null;
+  }
+
+  function saveProduct() {
+    const name = document.getElementById('pName').value.trim();
+    const price = parseFloat(document.getElementById('pPrice').value);
+    if (!name) { alert('Product ka naam zaroor likhein!'); return; }
+    if (isNaN(price) || price < 0) { alert('Sahi price likhein!'); return; }
+    const data = {
+      name, price,
+      cat: document.getElementById('pCat').value,
+      desc: document.getElementById('pDesc').value.trim(),
+      stock: document.getElementById('pStock').value,
+      img: currentImgBase64 || null,
+      date: new Date().toISOString()
+    };
+    if (editingId) {
+      const i = products.findIndex(x => x.id === editingId);
+      products[i] = { ...products[i], ...data };
+    } else {
+      data.id = Date.now().toString();
+      products.unshift(data);
+    }
+    save(); closeModal(); renderProducts();
+  }
+
+  function deleteProduct(id) {
+    if (!confirm('Yeh product delete karein?')) return;
+    products = products.filter(x => x.id !== id);
+    save(); renderProducts();
+  }
+
+  function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+
+  function renderProducts() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filterCat = document.getElementById('filterCat').value;
+    const sortBy = document.getElementById('sortBy').value;
+
+    let list = products.filter(p =>
+      (p.name.toLowerCase().includes(search) || (p.desc||'').toLowerCase().includes(search)) &&
+      (!filterCat || p.cat === filterCat)
+    );
+
+    if (sortBy === 'price_asc') list.sort((a,b) => a.price - b.price);
+    else if (sortBy === 'price_desc') list.sort((a,b) => b.price - a.price);
+    else if (sortBy === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+
+    document.getElementById('totalCount').textContent = products.length;
+    document.getElementById('totalValue').textContent = 'Rs ' + products.reduce((s,p) => s+p.price, 0).toLocaleString();
+    document.getElementById('resultTitle').textContent =
+      list.length === products.length ? `Tamam Products (${list.length})` : `${list.length} Product Mile`;
+
+    const grid = document.getElementById('productsGrid');
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty-state">
+        <div class="big">📦</div>
+        <h3>${!products.length ? 'Koi Product Nahi' : 'Kuch nahi mila'}</h3>
+        <p>${!products.length ? 'Upar "+ Product Add Karein" dabaein' : 'Dusra naam try karein'}</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(p => `
+      <div class="product-card">
+        ${p.img
+          ? `<img class="product-img" src="${p.img}" alt="${escHtml(p.name)}" onclick="openLightbox('${p.img}')" title="Bada dekhein">`
+          : `<div class="product-img-placeholder">${catEmoji[p.cat]||'📦'}</div>`
+        }
+        <div class="product-body">
+          <span class="category-badge cat-${p.cat}">${catLabels[p.cat]}</span>
+          <div class="product-name">${escHtml(p.name)}</div>
+          ${p.desc ? `<div class="product-desc">${escHtml(p.desc)}</div>` : ''}
+          <div class="product-price">Rs ${p.price.toLocaleString()}</div>
+          <div class="product-footer">
+            <div class="product-stock">
+              <div class="dot ${p.stock==='in'?'in':'out'}"></div>
+              <span style="color:var(--muted)">${p.stock==='in'?'In Stock':'Out of Stock'}</span>
+            </div>
+            <div class="card-actions">
+              <button class="icon-btn" onclick="openModal('${p.id}')">✏️ Edit</button>
+              <button class="icon-btn del" onclick="deleteProduct('${p.id}')">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+  // Drag & Drop
+  const ua = document.getElementById('uploadArea');
+  ua.addEventListener('dragover', e => { e.preventDefault(); ua.classList.add('drag-over'); });
+  ua.addEventListener('dragleave', () => ua.classList.remove('drag-over'));
+  ua.addEventListener('drop', e => {
+    e.preventDefault(); ua.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const inp = document.getElementById('pImg');
+      try { const dt = new DataTransfer(); dt.items.add(file); inp.files = dt.files; } catch(e){}
+      handleImageUpload({ target: { files: [file] } });
+    }
+  });
+
+  renderProducts();
+</script>
+</body>
+</html>
